@@ -1,0 +1,575 @@
+/* ==========================================================================
+   FROSTPANE - PURE CSS GLASS THEME (Spotify 1.3.x)
+   Selektoren: bevorzugt data-testid / data-encore-id / main-* / x-*.
+   Gehashte Klassen (z. B. "e-101040-...") ändern sich mit jedem Spotify-Build,
+   darum nur per [class*="..."] auf den stabilen Teil.
+   Alle --fp-* Werte werden vom Einstellungs-Panel (theme.js) live überschrieben.
+   ========================================================================== */
+
+/* 1. DESIGN TOKENS -------------------------------------------------------- */
+:root {
+  --fp-gap: 10px;
+  --fp-radius: 16px;
+  --fp-glass-alpha: 0.42;
+  --fp-bg-blur: 30px;
+  --bg-brightness: 0.62;
+  --bg-saturate: 2.2;
+  --bg-opacity: 0.65;
+
+  --fp-radius-sm: calc(var(--fp-radius) * 0.625);   /* 10px bei 16 */
+  --fp-radius-md: calc(var(--fp-radius) * 0.75);    /* 12px bei 16 */
+
+  --glass-bg: rgba(var(--spice-rgb-main), var(--fp-glass-alpha));
+  --glass-tint: rgba(var(--spice-rgb-button-disabled), 0.06);
+  --glass-tint-hover: rgba(var(--spice-rgb-button-disabled), 0.12);
+  --glass-border: 1px solid rgba(var(--spice-rgb-button-disabled), 0.08);
+  --glass-reflection: inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 1px 0 rgba(0, 0, 0, 0.1);
+
+  --fp-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --fp-ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --fp-shadow-sm: 0 4px 12px rgba(var(--spice-rgb-shadow), 0.15);
+  --fp-shadow-md: 0 10px 30px 0 rgba(var(--spice-rgb-shadow), 0.22);
+  /* Eigene Akzent-Variablen: Spotify definiert --spice-button in "encore-inverted-*"-Bereichen
+     (z. B. ausgewählte Chips) auf Weiß um. Hier auf :root ausgewertet -> überall dieselbe Farbe. */
+  --fp-accent: var(--spice-button);
+  --fp-accent-active: var(--spice-button-active);
+  --fp-rgb-accent: var(--spice-rgb-button);
+  --fp-on-accent: #ffffff;            /* Schrift auf Akzentflächen; theme.js setzt Schwarz bei hellen Akzenten */
+  --accent-glow: 0 6px 18px rgba(var(--fp-rgb-accent), 0.45);
+
+  --text-glow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+:root.fp-light {
+  --bg-brightness: 0.95;
+  --bg-saturate: 1.9;
+  --bg-opacity: 0.75;
+  --glass-reflection: inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.55);
+  --text-glow: none;
+}
+
+/* 2. DYNAMISCHER HINTERGRUND ---------------------------------------------- */
+.Root__top-container {
+  display: grid !important;
+  gap: var(--fp-gap) !important;
+  padding: var(--fp-gap) !important;
+  box-sizing: border-box !important;
+  background-color: var(--spice-main) !important;
+  position: relative;
+  isolation: isolate;                 /* z-index:-1 unten bleibt über dem Container-Hintergrund */
+}
+
+.Root__top-container::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: var(--image_url);
+  background-size: cover;
+  background-position: center;
+  filter: blur(var(--fp-bg-blur)) brightness(var(--bg-brightness)) saturate(var(--bg-saturate));
+  opacity: var(--bg-opacity);
+  z-index: -1;
+  pointer-events: none;
+  transform: translateZ(0);
+  transition: background-image 0.5s var(--fp-ease-smooth);
+}
+
+:root.fp-no-cover-bg .Root__top-container::before { display: none; }
+
+/* Light: Spotifys kräftige Kopfbereich-Farbe ist für weiße Schrift gedacht -> zu Pastell abschwächen,
+   sonst steht dunkle Schrift auf dunklem Lila */
+:root.fp-light .main-entityHeader-backgroundColor,
+:root.fp-light .main-actionBarBackground-background {
+  opacity: 0.28 !important;
+}
+/* Spotify färbt Kopfzeilen-Infos fest weiß (für dunkle Köpfe) -> im hellen Kopf dunkel */
+:root.fp-light .main-entityHeader-container:not(.main-entityHeader-withBackgroundImage) .main-entityHeader-headerText * {
+  color: var(--spice-text) !important;
+}
+/* Kategorie-Kacheln (Suche) haben immer kräftige Farben: weiße Schrift behalten */
+/* (erkannt an Spotifys Inline-Farbe der Kachel, gilt für alle Kategorien inkl. Charts/Hubs) */
+:root.fp-light .Root__main-view a > div[style*="background-color"] > [data-encore-id="text"],
+:root.fp-light [data-testid="lyrics-npv-section"] .main-nowPlayingView-sectionHeader * {
+  color: #ffffff !important;
+}
+/* Künstler-Banner ist ein Foto: Schrift darauf bleibt immer weiß */
+:root.fp-light .main-entityHeader-withBackgroundImage .main-entityHeader-headerText,
+:root.fp-light .main-entityHeader-withBackgroundImage .main-entityHeader-headerText * {
+  color: #ffffff !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55) !important;
+}
+
+/* 3. TRANSPARENZ RESETS --------------------------------------------------- */
+.main-view-container,
+.main-view-container__scroll-node-child,
+.main-yourLibraryX-entryPoints,
+.main-yourLibraryX-libraryContainer,
+.main-nowPlayingBar-nowPlayingBar,
+.main-home-homeHeader,
+.main-nowPlayingView-container,
+.main-nowPlayingView-mainContainerV2,
+.main-nowPlayingView-headerContainerV2,
+#Desktop_PanelContainer_Id,
+#Desktop_PanelContainer_Id > div,
+.Root__right-sidebar-peek,
+.Root__right-sidebar-peekContent,
+.Root__globalNav {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+h1, h2, h3, [data-testid="entityTitle"], [data-encore-id="cardTitle"], [data-encore-id="listRowTitle"] {
+  text-shadow: var(--text-glow);
+}
+
+/* 4. MAIN PANELS ---------------------------------------------------------- */
+/* Kein backdrop-filter: der Hintergrund ist schon geblurrt, ein zweiter Blur
+   wäre unsichtbar, kostet aber pro Frame mehrere Vollbild-GPU-Durchgänge. */
+.Root__nav-bar,
+.Root__main-view,
+.Root__right-sidebar,
+.Root__now-playing-bar {
+  margin: 0 !important;
+  border-radius: var(--fp-radius) !important;
+  background-color: var(--glass-bg) !important;
+  border: var(--glass-border) !important;
+  box-shadow: var(--fp-shadow-md), var(--glass-reflection) !important;
+  z-index: 1;
+  overflow: hidden;
+  box-sizing: border-box !important;
+}
+
+.Root__nav-bar {
+  z-index: 100 !important;
+  position: relative !important;
+}
+
+#Desktop_LeftSidebar_Id {
+  width: 100% !important;
+  height: 100% !important;
+  background-color: transparent !important;
+}
+
+/* 5. TOP-BAR (GLOBAL NAV) -------------------------------------------------- */
+.Root__globalNav [data-encore-id="buttonTertiary"],
+.Root__globalNav [data-testid="user-widget-link"] {
+  background-color: var(--glass-bg) !important;
+  border: var(--glass-border) !important;
+  box-shadow: var(--fp-shadow-sm), var(--glass-reflection) !important;
+  transition: transform 0.2s var(--fp-ease-spring), background-color 0.2s ease !important;
+}
+/* Buttons ohne eigenen Hintergrund (Pfeile, Glocke ...) bleiben flach */
+.Root__globalNav [aria-label="Go back"],
+.Root__globalNav [aria-label="Go forward"],
+.Root__globalNav .main-globalNav-searchInput button {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.Root__globalNav [data-encore-id="buttonTertiary"]:hover,
+.Root__globalNav [data-testid="user-widget-link"]:hover {
+  background-color: var(--glass-tint-hover) !important;
+  transform: scale(1.06);
+}
+
+.main-globalNav-searchInput input,
+.x-searchInput-searchInputInput {
+  background-color: var(--glass-bg) !important;
+  border: var(--glass-border) !important;
+  box-shadow: var(--fp-shadow-sm), var(--glass-reflection) !important;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease !important;
+}
+.main-globalNav-searchInput input:hover { background-color: var(--glass-tint-hover) !important; }
+.main-globalNav-searchInput input:focus {
+  box-shadow: 0 0 0 2px rgba(var(--fp-rgb-accent), 0.7), var(--accent-glow) !important;
+}
+
+/* 6. FILTER CHIPS ---------------------------------------------------------- */
+[data-encore-id="chip"] > span {
+  background-color: var(--glass-tint) !important;
+  border: 1px solid rgba(var(--spice-rgb-button-disabled), 0.1) !important;
+  border-radius: 99px !important;
+  transition: background-color 0.2s ease, transform 0.2s var(--fp-ease-spring), box-shadow 0.2s ease !important;
+}
+[data-encore-id="chip"]:hover > span {
+  background-color: var(--glass-tint-hover) !important;
+  transform: scale(1.05);
+}
+[data-encore-id="chip"] > span[class*="chip__inner--selected"] {
+  background-color: var(--fp-accent) !important;
+  color: var(--fp-on-accent) !important;
+  /* kein äußerer Schein: das Eltern-Element schneidet ihn ab -> eckiger Rand um die Pille */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  border-color: transparent !important;
+}
+
+/* 7. HOME: SHORTCUT-KACHELN ------------------------------------------------ */
+.view-homeShortcutsGrid-shortcut {
+  background-color: var(--glass-tint) !important;
+  border: var(--glass-border) !important;
+  border-radius: var(--fp-radius-sm) !important;
+  box-shadow: var(--glass-reflection) !important;
+  overflow: hidden;
+  transition: background-color 0.2s ease, transform 0.25s var(--fp-ease-spring), box-shadow 0.25s ease !important;
+}
+.view-homeShortcutsGrid-shortcut:hover {
+  background-color: var(--glass-tint-hover) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--fp-shadow-sm), var(--glass-reflection) !important;
+}
+
+/* 8. 3D KIPP- & HEBE-EFFEKT ------------------------------------------------ */
+/* Kein will-change: sonst wird jede Karte ein eigener GPU-Layer (viel RAM). */
+[data-encore-id="card"],
+.main-coverSlotCollapsed-container,
+.main-entityHeader-imageContainer,
+.main-nowPlayingView-coverArtContainer {
+  transition: transform 0.25s var(--fp-ease-spring), box-shadow 0.25s ease, background-color 0.2s ease !important;
+}
+
+:root:not(.fp-no-tilt) [data-encore-id="card"]:hover,
+:root:not(.fp-no-tilt) .main-entityHeader-imageContainer:hover,
+:root:not(.fp-no-tilt) .main-nowPlayingView-coverArtContainer:hover {
+  transform: perspective(800px) rotateX(4deg) translateY(-6px) scale(1.035) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), 0 0 20px rgba(var(--fp-rgb-accent), 0.25) !important;
+}
+:root:not(.fp-no-tilt) .main-coverSlotCollapsed-container:hover {
+  transform: translateY(-2px) scale(1.04) !important;
+}
+
+[data-encore-id="card"] { border-radius: var(--fp-radius-md) !important; }
+[data-encore-id="card"]:hover { background-color: var(--glass-tint) !important; }
+
+.main-cardImage-imageWrapper,
+.main-cardImage-imageWrapper img,
+.main-entityHeader-imageContainer,
+.main-entityHeader-imageContainer img,
+.main-nowPlayingView-coverArtContainer img {
+  border-radius: var(--fp-radius-md) !important;
+}
+.main-cardImage-imageWrapper { overflow: hidden !important; }
+
+.main-entityHeader-imageContainer { box-shadow: var(--fp-shadow-md) !important; }
+
+.x-entityImage-imageContainer,
+.x-entityImage-imageContainer img,
+.main-coverSlotCollapsed-container img {
+  border-radius: 8px !important;
+}
+
+/* 9. PLAY-BUTTONS ---------------------------------------------------------- */
+[data-encore-id="card"] [data-encore-id="buttonPrimary"] > span,
+[data-testid="action-bar-row"] [data-encore-id="buttonPrimary"] > span {
+  background: linear-gradient(135deg, var(--fp-accent) 0%, var(--fp-accent-active) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: var(--accent-glow) !important;
+}
+[data-encore-id="card"] [data-encore-id="buttonPrimary"],
+[data-testid="action-bar-row"] [data-encore-id="buttonPrimary"] {
+  transition: transform 0.25s var(--fp-ease-spring) !important;
+}
+[data-encore-id="card"] [data-encore-id="buttonPrimary"]:hover,
+[data-testid="action-bar-row"] [data-encore-id="buttonPrimary"]:hover { transform: scale(1.08) !important; }
+[data-encore-id="card"] [data-encore-id="buttonPrimary"]:active,
+[data-testid="action-bar-row"] [data-encore-id="buttonPrimary"]:active { transform: scale(0.94) !important; }
+
+/* 10. PLAYER-STEUERUNG ----------------------------------------------------- */
+.main-nowPlayingBar-nowPlayingBar { padding: 0 18px !important; }
+
+[data-testid="control-button-playpause"] {
+  transition: transform 0.25s var(--fp-ease-spring) !important;
+}
+[data-testid="control-button-playpause"] > span {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+[data-testid="control-button-playpause"]:hover { transform: scale(1.1) !important; }
+[data-testid="control-button-playpause"]:hover > span {
+  background-color: var(--fp-accent) !important;
+  color: var(--fp-on-accent) !important;
+  box-shadow: var(--accent-glow) !important;
+}
+[data-testid="control-button-playpause"]:active { transform: scale(0.92) !important; }
+
+[data-testid="player-controls"] button:not([data-testid="control-button-playpause"]) {
+  transition: color 0.2s ease, transform 0.2s var(--fp-ease-spring) !important;
+}
+[data-testid="player-controls"] button:not([data-testid="control-button-playpause"]):hover {
+  transform: scale(1.12) !important;
+}
+
+/* 11. FORTSCHRITTSBALKEN (Song + Lautstärke) -------------------------------- */
+.x-progressBar-progressBarBg {
+  background-color: rgba(var(--spice-rgb-button-disabled), 0.15) !important;
+  border-radius: 99px !important;
+}
+.x-progressBar-fillColor {
+  background: linear-gradient(90deg, var(--fp-accent), var(--fp-accent-active)) !important;
+  border-radius: 99px !important;
+}
+/* Hover-Vorschau bis zur Maus: nur dezent, sonst wirkt es, als würde Lautstärke/Position schon springen */
+.x-progressBar-progressFillColor {
+  background: rgba(var(--spice-rgb-text), 0.18) !important;
+  border-radius: 99px !important;
+}
+.playback-progressbar .x-progressBar-progressBarBg {
+  height: 5px !important;
+  transition: height 0.2s ease !important;
+}
+.playback-progressbar:hover .x-progressBar-progressBarBg { height: 7px !important; }
+
+/* Regler vertikal mittig: Spotify setzt top:50% ohne Gegen-Verschiebung -> hing unter dem Balken */
+.progress-bar__slider {
+  top: 50% !important;
+  margin-top: 0 !important;
+  transform: translateY(-50%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 12. LAUTSTÄRKE ----------------------------------------------------------- */
+[data-testid="volume-bar"] {
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 99px;
+  background-color: var(--glass-tint);
+  border: var(--glass-border);
+  box-shadow: var(--glass-reflection);
+  transition: background-color 0.2s ease;
+}
+[data-testid="volume-bar"]:hover { background-color: var(--glass-tint-hover); }
+
+/* breiter + dicker, Regler immer sichtbar */
+[data-testid="volume-bar"] .playback-progressbar { min-width: 120px; }
+/* feste Dicke: kein Aufblähen beim Hover */
+[data-testid="volume-bar"] .x-progressBar-progressBarBg { height: 6px !important; }
+[data-testid="volume-bar"] .progress-bar__slider {
+  display: block !important;
+  opacity: 1 !important;
+  transform: translateY(-50%) scale(0.85) !important;
+  transition: transform 0.2s var(--fp-ease-spring) !important;
+}
+[data-testid="volume-bar"]:hover .progress-bar__slider { transform: translateY(-50%) scale(1.1) !important; }
+
+[data-testid="volume-bar-toggle-mute-button"] { transition: transform 0.2s var(--fp-ease-spring) !important; }
+[data-testid="volume-bar-toggle-mute-button"]:hover { transform: scale(1.12); }
+
+/* Prozentanzeige (von theme.js eingefügt) */
+.fp-volume-pct {
+  min-width: 34px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: rgba(var(--spice-rgb-text), 0.75);
+  user-select: none;
+}
+:root.fp-hide-volume-pct .fp-volume-pct { display: none; }
+
+/* 13. SONG- & BIBLIOTHEKSZEILEN ------------------------------------------- */
+/* Kein margin: Spotifys virtuelle Liste rechnet mit fester Zeilenhöhe. */
+.main-view-container [role="row"][aria-rowindex],
+.main-yourLibraryX-libraryContainer [role="row"] {
+  border-radius: var(--fp-radius-sm) !important;
+  overflow: hidden;
+  transition: background-color 0.15s ease, transform 0.15s ease !important;
+}
+.main-view-container [role="row"][aria-rowindex]:hover {
+  background-color: rgba(var(--spice-rgb-button-disabled), 0.07) !important;
+  transform: translateX(4px);
+}
+.main-view-container [role="row"][aria-selected="true"] {
+  background-color: rgba(var(--spice-rgb-button-disabled), 0.12) !important;
+}
+
+/* 14. RECHTE SIDEBAR (NOW PLAYING VIEW) ----------------------------------- */
+.main-nowPlayingView-section {
+  border: var(--glass-border) !important;
+  border-radius: var(--fp-radius-md) !important;
+  box-shadow: var(--glass-reflection) !important;
+}
+/* Songtext-Vorschau behält Spotifys farbige Karte: deren Schriftfarbe ist fest darauf abgestimmt
+   (auf Glas war sie im hellen Schema unlesbar) */
+.main-nowPlayingView-section:not([data-testid="lyrics-npv-section"]) {
+  background-color: var(--glass-tint) !important;
+}
+.main-nowPlayingView-coverArtContainer img { box-shadow: var(--fp-shadow-md); }
+
+/* 15. MENÜS, TOOLTIPS & SCROLLBARS ---------------------------------------- */
+/* Menüs liegen über scharfem Inhalt -> hier lohnt backdrop-filter */
+.main-contextMenu-menu,
+#context-menu ul[role="menu"],
+.main-userWidget-menu,
+.main-typeahead-menu {
+  background-color: rgba(var(--spice-rgb-card), 0.72) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid rgba(var(--spice-rgb-button-disabled), 0.1) !important;
+  border-radius: var(--fp-radius-md) !important;
+  box-shadow: var(--fp-shadow-md) !important;
+  padding: 6px !important;
+}
+.main-contextMenu-menuItemButton { border-radius: 8px !important; }
+
+.os-scrollbar-handle {
+  background: rgba(var(--spice-rgb-button-disabled), 0.2) !important;
+  border-radius: 10px !important;
+}
+.os-scrollbar-handle:hover { background: rgba(var(--spice-rgb-button-disabled), 0.4) !important; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(var(--spice-rgb-button-disabled), 0.2); border-radius: 10px; }
+
+/* 16. EINSTELLUNGS-PANEL --------------------------------------------------- */
+.fp-settings { display: grid; gap: 14px; }
+.fp-settings h3 {
+  margin: 8px 0 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--spice-subtext);
+  text-shadow: none;
+}
+.fp-row {
+  display: grid;
+  grid-template-columns: 1fr minmax(140px, 220px) 48px;
+  align-items: center;
+  gap: 12px;
+}
+.fp-row label { font-size: 14px; }
+.fp-row output { font-size: 12px; text-align: right; color: var(--spice-subtext); font-variant-numeric: tabular-nums; }
+.fp-row input[type="range"] { width: 100%; accent-color: var(--fp-accent); }
+.fp-row input[type="color"] { width: 48px; height: 28px; border: none; background: none; padding: 0; cursor: pointer; }
+.fp-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--fp-accent); justify-self: end; }
+/* Farbschema-Auswahl als Farbfelder statt nativem <select> (dessen Liste war weiß auf weiß) */
+.fp-swatches { display: flex; flex-wrap: wrap; gap: 8px; grid-column: 2 / -1; }
+.fp-swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 99px;
+  border: 1px solid rgba(var(--spice-rgb-button-disabled), 0.12);
+  background: var(--glass-tint);
+  color: var(--spice-text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s var(--fp-ease-spring);
+}
+.fp-swatch:hover { background: var(--glass-tint-hover); transform: scale(1.04); }
+.fp-swatch[aria-pressed="true"] { border-color: var(--fp-accent); box-shadow: 0 0 0 1px var(--fp-accent), var(--accent-glow); }
+.fp-swatch i {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--spice-rgb-button-disabled), 0.25);
+  background: linear-gradient(135deg, var(--a) 0 50%, var(--b) 50% 100%);
+}
+.fp-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+.fp-actions button {
+  background: var(--glass-tint-hover);
+  color: var(--spice-text);
+  border: var(--glass-border);
+  border-radius: 99px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.fp-actions button:hover { background: var(--fp-accent); color: var(--fp-on-accent); }
+
+/* 16b. SPOTIFY-EINSTELLUNGEN: SCHALTER & AUSWAHLLISTEN --------------------- */
+.x-toggle-indicatorWrapper {
+  background-color: rgba(var(--spice-rgb-button-disabled), 0.18) !important;
+  transition: background-color 0.2s ease !important;
+}
+.x-toggle-indicator { background-color: var(--spice-text) !important; }
+/* Knopf in Kontrastfarbe, sonst ist er bei hellen Akzenten (z. B. Weiß) unsichtbar */
+.x-toggle-input:checked ~ .x-toggle-indicatorWrapper { background-color: var(--fp-accent) !important; }
+.x-toggle-input:checked ~ .x-toggle-indicatorWrapper .x-toggle-indicator { background-color: var(--fp-on-accent) !important; }
+
+select.main-dropDown-dropDown {
+  background-color: var(--glass-tint-hover) !important;
+  color: var(--spice-text) !important;
+  border: var(--glass-border) !important;
+  border-radius: 8px !important;
+}
+/* Native Optionslisten: sonst Systemfarben (hell auf hell) */
+option {
+  background-color: var(--spice-card);
+  color: var(--spice-text);
+}
+
+/* 17. POPUP-MODALS (Einstellungen, Marketplace-Dialoge) ------------------- */
+.GenericModal {
+  background-color: rgba(var(--spice-rgb-main), 0.82) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  border: var(--glass-border) !important;
+  border-radius: var(--fp-radius) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), var(--glass-reflection) !important;
+}
+.GenericModal * { text-shadow: none; }
+.main-embedWidgetGenerator-container { background: transparent !important; }
+
+/* 18. MARKETPLACE ----------------------------------------------------------- */
+.marketplace-header { background: transparent !important; }
+
+.marketplace-tabBar-headerItemLink {
+  border-radius: 99px !important;
+  transition: background-color 0.2s ease, color 0.2s ease !important;
+}
+.marketplace-tabBar-headerItemLink:hover { background-color: var(--glass-tint-hover) !important; }
+.marketplace-tabBar-headerItemLink.marketplace-tabBar-active {
+  background-color: var(--fp-accent) !important;
+  color: var(--fp-on-accent) !important;
+  /* kein äußerer Schein: das Eltern-Element schneidet ihn ab -> eckiger Rand um die Pille */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  border-color: transparent !important;
+}
+
+.marketplace-header .Dropdown-control,
+.marketplace-header .searchbar-bar,
+.marketplace-header-icon-button {
+  background-color: var(--glass-tint) !important;
+  border: var(--glass-border) !important;
+  border-radius: 99px !important;
+  color: var(--spice-text) !important;
+  box-shadow: var(--glass-reflection) !important;
+  transition: background-color 0.2s ease !important;
+}
+.marketplace-header .Dropdown-control:hover,
+.marketplace-header-icon-button:hover { background-color: var(--glass-tint-hover) !important; }
+.marketplace-header .searchbar-bar:focus { box-shadow: 0 0 0 2px rgba(var(--fp-rgb-accent), 0.7) !important; }
+
+.Dropdown-menu {
+  background-color: rgba(var(--spice-rgb-card), 0.85) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  border: var(--glass-border) !important;
+  border-radius: var(--fp-radius-md) !important;
+  box-shadow: var(--fp-shadow-md) !important;
+  padding: 4px !important;
+}
+.Dropdown-option { border-radius: 8px !important; }
+.Dropdown-option:hover, .Dropdown-option.is-selected { background-color: var(--glass-tint-hover) !important; }
+
+/* Marketplace nutzt die alte Klasse main-card-card */
+.main-card-card {
+  background-color: var(--glass-tint) !important;
+  border: var(--glass-border) !important;
+  border-radius: var(--fp-radius-md) !important;
+  box-shadow: var(--glass-reflection) !important;
+  transition: transform 0.25s var(--fp-ease-spring), box-shadow 0.25s ease, background-color 0.2s ease !important;
+}
+.main-card-card:hover { background-color: var(--glass-tint-hover) !important; }
+:root:not(.fp-no-tilt) .main-card-card:hover {
+  transform: translateY(-4px) scale(1.02) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), var(--glass-reflection) !important;
+}
+.main-card-card .main-cardImage-imageWrapper,
+.main-card-card img { border-radius: var(--fp-radius-sm) !important; }
+
+/* nur Form ändern: Farben kommen per [data-tag] (z. B. rotes "external JS" als Warnung) */
+.marketplace-card__tag {
+  border-radius: 99px !important;
+  padding-inline: 10px !important;
+}

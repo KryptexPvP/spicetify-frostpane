@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Frostpane",
+    "description": "Frosted-glass panels over a blurred album-cover background, with live in-app settings for colors, glass, radius and volume.",
+    "preview": "preview.png",
+    "readme": "README.md",
+    "usercss": "user.css",
+    "schemes": "color.ini",
+    "include": [
+      "https://raw.githubusercontent.com/KryptexPvP/spicetify-frostpane/main/theme.js"
+    ],
+    "authors": [
+      { "name": "KryptexPvP", "url": "https://github.com/KryptexPvP" }
+    ],
+    "tags": ["dark", "light", "glass", "blur", "dynamic"]
+  }
+]
