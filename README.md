@@ -3,7 +3,7 @@
 Frosted-glass Spotify theme for [Spicetify](https://spicetify.app): floating glass panels over a blurred
 cover of the song that is playing, soft shadows and spring animations.
 
-![Preview](preview.png)
+![Frostpane](frostpane.png)
 
 ## Features
 
@@ -16,7 +16,19 @@ cover of the song that is playing, soft shadows and spring animations.
 - Readable text on any accent color (also white or very light accents), contrast-checked in all schemes
 - Settings panel in English or German, following Spotify's language
 
-![Settings](settings.png)
+## Color schemes
+
+| Dark | Light |
+| --- | --- |
+| ![Dark](screenshots/dark.png) | ![Light](screenshots/light.png) |
+
+| Blue | Pink |
+| --- | --- |
+| ![Blue](screenshots/blue.png) | ![Pink](screenshots/pink.png) |
+
+## Settings
+
+![Settings](screenshots/settings.png)
 
 ## Install
 
@@ -24,9 +36,11 @@ cover of the song that is playing, soft shadows and spring animations.
 
 **Manual:**
 
+1. Download this repository and copy the `Frostpane` folder into your Spicetify themes folder
+   (run `spicetify path userdata` and open its `Themes` subfolder).
+2. Run:
+
 ```powershell
-cd "$(spicetify path userdata)\Themes"
-git clone https://github.com/KryptexPvP/spicetify-frostpane Frostpane
 spicetify config current_theme Frostpane color_scheme Frost-Dark inject_theme_js 1
 spicetify apply
 ```
